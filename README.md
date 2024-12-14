@@ -125,5 +125,62 @@
             }
         }
     </script>
+    <script>
+    let items = [];
+
+    function addItem() {
+        const itemName = document.getElementById('item_name').value;
+        const itemPrice = parseFloat(document.getElementById('item_price').value);
+        const quantity = parseInt(document.getElementById('quantity').value);
+
+        if (itemName && itemPrice > 0 && quantity > 0) {
+            const item = { item_name: itemName, item_price: itemPrice, quantity: quantity };
+            fetch('http://localhost:3000/add_item', { // Updated URL
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(item)
+            })
+            .then(response => response.json())
+            .then(data => {
+                items.push(item);
+                updateCart();
+                updateTotal(data.total);
+                clearForm();
+            });
+        }
+    }
+
+    function removeItem(index) {
+        fetch('http://localhost:3000/remove_item', { // Updated URL
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ index: index })
+        })
+        .then(response => response.json())
+        .then(data => {
+            items.splice(index, 1);
+            updateCart();
+            updateTotal(data.total);
+        });
+    }
+
+    function generateReceipt() {
+        const customerName = prompt('Enter customer name:');
+        if (customerName) {
+            fetch('http://localhost:3000/generate_receipt', { // Updated URL
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customer_name: customerName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                items = [];
+                updateCart();
+                updateTotal(0);
+            });
+        }
+    }
+</script>
 </body>
 </html>
