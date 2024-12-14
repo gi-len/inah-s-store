@@ -57,33 +57,25 @@
 
             if (itemName && itemPrice > 0 && quantity > 0) {
                 const item = { item_name: itemName, item_price: itemPrice, quantity: quantity };
-                fetch('/add_item', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(item)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    items.push(item);
-                    updateCart();
-                    updateTotal(data.total);
-                    clearForm();
-                });
+
+                // Simulate backend response for now
+                const total = items.reduce((sum, it) => sum + it.item_price * it.quantity, 0) + (itemPrice * quantity);
+                items.push(item);
+                updateCart();
+                updateTotal(total);
+                clearForm();
+            } else {
+                alert('Please fill out all fields correctly.');
             }
         }
 
         function removeItem(index) {
-            fetch('/remove_item', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ index: index })
-            })
-            .then(response => response.json())
-            .then(data => {
+            if (index > -1 && index < items.length) {
                 items.splice(index, 1);
+                const total = items.reduce((sum, it) => sum + it.item_price * it.quantity, 0);
                 updateCart();
-                updateTotal(data.total);
-            });
+                updateTotal(total);
+            }
         }
 
         function updateCart() {
@@ -110,77 +102,13 @@
         function generateReceipt() {
             const customerName = prompt('Enter customer name:');
             if (customerName) {
-                fetch('/generate_receipt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ customer_name: customerName })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    items = [];
-                    updateCart();
-                    updateTotal(0);
-                });
-            }
-        }
-    </script>
-    <script>
-    let items = [];
-
-    function addItem() {
-        const itemName = document.getElementById('item_name').value;
-        const itemPrice = parseFloat(document.getElementById('item_price').value);
-        const quantity = parseInt(document.getElementById('quantity').value);
-
-        if (itemName && itemPrice > 0 && quantity > 0) {
-            const item = { item_name: itemName, item_price: itemPrice, quantity: quantity };
-            fetch('http://localhost:3000/add_item', { // Updated URL
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(item)
-            })
-            .then(response => response.json())
-            .then(data => {
-                items.push(item);
-                updateCart();
-                updateTotal(data.total);
-                clearForm();
-            });
-        }
-    }
-
-    function removeItem(index) {
-        fetch('http://localhost:3000/remove_item', { // Updated URL
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ index: index })
-        })
-        .then(response => response.json())
-        .then(data => {
-            items.splice(index, 1);
-            updateCart();
-            updateTotal(data.total);
-        });
-    }
-
-    function generateReceipt() {
-        const customerName = prompt('Enter customer name:');
-        if (customerName) {
-            fetch('http://localhost:3000/generate_receipt', { // Updated URL
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ customer_name: customerName })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
+                const total = items.reduce((sum, item) => sum + item.item_price * item.quantity, 0);
+                alert(`Receipt for ${customerName}\n\n${items.map(item => `${item.item_name}: Php ${item.item_price.toFixed(2)} x${item.quantity}`).join('\n')}\n\nTotal: Php ${total.toFixed(2)}`);
                 items = [];
                 updateCart();
                 updateTotal(0);
-            });
+            }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
